@@ -135,3 +135,4 @@ dmypy.json
 /.idea/AwesomeFlaskBoilerplate.iml
 /.idea/.gitignore
 /.idea
+/database.db

@@ -205,7 +205,7 @@ def login():
         thisuser = users.query.filter(users.username.like(userlogin.username.data.strip())).one_or_none()
         if thisuser:
             if thisuser.active:
-                if hashme(userlogin.password.data) == user.passwordhash:
+                if hashme(userlogin.password.data) == thisuser.passwordhash:
                     thisuser.authenticated = True
                     db.session.add(thisuser)
                     db.session.commit()

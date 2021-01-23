@@ -1,0 +1,26 @@
+
+
+{% block content %}
+<script>
+$(document).ready(function(){
+        document.getElementById("logindiv").addEventListener("click", function () {
+            document.getElementById("loginbutton").click()
+        });
+});
+</script>
+
+
+<nav>
+    <div class="nav-wrapper row" id="nav">
+      <div class="col s12 nav">
+        <a href="/index.html" class="breadcrumb">
+            <i class="material-icons left">home</i>Main</a>
+        <a href="#!" class="breadcrumb">Login</a>
+      </div>
+    </div>
+</nav>
+
+SWITCHBOARD
+
+
+{% endblock %}
