@@ -73,7 +73,7 @@ class users(db.Model):
         return self.active
 
     def get_id(self):
-        return self.username
+        return self.id
 
     def is_authenticated(self):
         return self.authenticated
@@ -178,13 +178,14 @@ def before_request():
     defaultapp.permanent_session_lifetime = timedelta(minutes=45)
 
 @login_manager.user_loader
-def user_loader(username):
-    return users.query.get(username)
+def user_loader(userid):
+    userquery = users.query.filter(users.id == userid).first()
+    return userquery
 
 @login_manager.unauthorized_handler
 def unauthorized():
     logthis("Unauthorized: URL: {} IP: {} UserAgent: {}".format(request.url, request.remote_addr, request.user_agent))
-    return redirect(url_for("login"))
+    return redirect(url_for("index"))
 
 @login_manager.request_loader
 def load_user_from_request(request):
@@ -234,7 +235,7 @@ def logout():
     db.session.commit()
     logthis("User {} Logged out.".format(thisuser.username))
     logout_user()
-    return redirect(url_for("userRegister"))
+    return redirect(url_for("index"))
 
 @defaultapp.route('/switchboard.html', methods=["GET", "POST"])
 @login_required

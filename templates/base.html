@@ -5,11 +5,13 @@
         <link type="text/css" href="/static/css/MaterialIcons.css" rel="stylesheet">
 
         <!--Import materialize.css-->
-        <link type="text/css" rel="stylesheet" href="/static/css/materialize.min.css"  media="screen,projection"/>
-        <link type="text/css" rel="stylesheet" href="/static/css/chart.css" />
-        <link type="text/css" rel="stylesheet" href="/static/css/theme.grey.css" />
-        <link type="text/css" rel="stylesheet" href="/static/css/evo-calendar.css" />
-        <link type="text/css" rel="stylesheet" href="/static/css/evo-calendar.midnight-blue.css" />
+        <link type="text/css" rel="stylesheet" href="/static/css/materialize.min.css" rel="stylesheet">
+        <link type="text/css" rel="stylesheet" href="/static/css/chart.css" rel="stylesheet">
+        <link type="text/css" rel="stylesheet" href="/static/css/theme.grey.css" rel="stylesheet">
+        <link type="text/css" rel="stylesheet" href="/static/css/colors.css" rel="stylesheet">
+
+        <link type="text/css" rel="stylesheet" href="/static/css/evo-calendar.css" rel="stylesheet">
+        <link type="text/css" rel="stylesheet" href="/static/css/evo-calendar.midnight-blue.css" rel="stylesheet">
 
         <!--Let browser know website is optimized for mobile-->
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -19,8 +21,18 @@
 <body>
 
     <style>
-    body {font-family:Karla;background-color:#444;}
+    body { font-family:Karla; background-color:#eee;}
+    .longbutton {width:100%;}
+    .textcontain, .btn-row{background-color:white; border-radius:5px; padding:5px; margin-top:10px;}
+    .error {background-color:red;}
     </style>
+
+    <script type="text/javascript" src="/static/js/jquery.js"></script>
+    <script type="text/javascript" src="/static/js/materialize.min.js"></script>
+    <script type="text/javascript" src="/static/js/d3.min.js"></script>
+    <script src="/static/js/jquery.tablesorter.min.js"></script>
+    <script src="/static/js/jquery.tablesorter.widgets.min.js"></script>
+    <script src="/static/js/evo-calendar.js"></script>
 
     <!-- Constants -->
 
@@ -28,13 +40,5 @@
 
     {% block content %}{% endblock %}
 
-    <!--JavaScript at end of body for optimized loading-->
-        <script type="text/javascript" src="/static/js/jquery.js"></script>
-        <script type="text/javascript" src="/static/js/materialize.min.js"></script>
-        <script type="text/javascript" src="/static/js/d3.min.js"></script>
-        <script src="/static/js/jquery.tablesorter.min.js"></script>
-        <script src="/static/js/jquery.tablesorter.widgets.min.js"></script>
-        <script src="/static/js/evo-calendar.js"></script>
-    <!-- End Javascript-->
     </body>
 </html>

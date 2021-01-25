@@ -1,26 +1,32 @@
 
+{% extends "base.html" %}
 
 {% block content %}
+
 <script>
 $(document).ready(function(){
-        document.getElementById("logindiv").addEventListener("click", function () {
-            document.getElementById("loginbutton").click()
-        });
-});
+
+  });
 </script>
 
-
 <nav>
-    <div class="nav-wrapper row" id="nav">
-      <div class="col s12 nav">
+    <div class="nav-wrapper row bgMAROON" id="nav">
+      <div class="col s10 nav">
         <a href="/index.html" class="breadcrumb">
             <i class="material-icons left">home</i>Main</a>
-        <a href="#!" class="breadcrumb">Login</a>
+        <a href="#!" class="breadcrumb">
+            Switchboard
+        </a>
       </div>
+        <div class="col s2 nav">
+            <a href="/logout.html" class="btn-large waves-effect waves-light bgCRIMSON">Logout</a>
+        </div>
     </div>
 </nav>
 
-SWITCHBOARD
+<div class="container">
+<br />
+    <a href="/first.html" class="btn-large waves-effect waves-light bgMAROON longbutton">first</a>
 
-
+</div>
 {% endblock %}

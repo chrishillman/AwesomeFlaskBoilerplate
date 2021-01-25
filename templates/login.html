@@ -12,7 +12,7 @@ $(document).ready(function(){
 
 
 <nav>
-    <div class="nav-wrapper row" id="nav">
+    <div class="nav-wrapper row bgMAROON" id="nav">
       <div class="col s12 nav">
         <a href="/index.html" class="breadcrumb">
             <i class="material-icons left">home</i>Main</a>
@@ -21,42 +21,37 @@ $(document).ready(function(){
     </div>
 </nav>
 
+<div class="container">
 
-{%if error %} <div class="textcontain row" style="background-color:red;"><div class="error col s12">
+{%if error %} <div class="textcontain row error"><div class="error col s12">
     Incorrect Password, Username, or your account is not active. <br>
     {{'If you recently signed up, <br> you need to activate your account.' if errortype == "activation" }}
     {{"If you forgot your password, click the button below to recover it." if errortype == "password"}}
     {{"Remember to use your email address as your username to log in." if errortype == "username"}}
 </div></div> {% endif %}
 
+
     <form  name="userlogin" id="userloginform" action="{{ url_for('login') }}" method="post">
         {{ userlogin.hidden_tag() }}
-        <div class="textcontain row"><div class="input-field col s12">
-          {{userlogin.username.label}}{{ userlogin.username }}
-    </div></div>
-      <div class="textcontain row">
-        <div class="input-field col s12">
-          {{userlogin.password.label}}{{ userlogin.password}}
+        <div class="textcontain row">
+            <div class="input-field col s12">
+              {{userlogin.username.label}}{{ userlogin.username }}
+            </div>
         </div>
-      </div>
 
-      <div class="row">
-        <div class="col s12" style="cursor: pointer;" id="logindiv">
-          {{ userlogin.submit(id="loginbutton", class="btn-large waves-effect waves-light green") }}
+        <div class="textcontain row">
+            <div class="input-field col s12">
+              {{userlogin.password.label}}{{ userlogin.password}}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s12" style="cursor: pointer;" id="logindiv">
+              {{ userlogin.submit(id="loginbutton", class="btn-large waves-effect waves-light bgMAROON longbutton") }}
+            </div>
+        </div>
     </form>
-    </div>
-  </div>
 
-<div class="row">
-    <div class="col s12">
-        <a class="btn-large waves-effect waves-light green" href="/user-forgot.html">Forgot Username or Password?</a>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col s12">
-        <a class="btn-large waves-effect waves-light green" href="/register.html">Register For an Account</a>
-    </div>
 </div>
 
 {% endblock %}
