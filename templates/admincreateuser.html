@@ -1,0 +1,73 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<script>
+$(document).ready(function(){
+
+    $('select').formSelect();
+
+  });
+</script>
+
+<nav>
+    <div class="nav-wrapper row bgMAROON" id="nav">
+      <div class="col s10 nav">
+        <a href="/switchboard.html" class="breadcrumb">
+            <i class="material-icons left">home</i>Main</a>
+        <a href="#!" class="breadcrumb">
+            Create User
+        </a>
+      </div>
+        <div class="col s2 nav">
+            <a href="/logout.html" class="btn-large waves-effect waves-light bgCRIMSON">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+<br />
+   
+    
+{%if error %} <div class="textcontain row error"><div class="error col s12">
+    <p>Incorrect Password, Username, or your account is not active. <br>
+    {{'If you recently signed up, <br> you need to activate your account.' if errortype == "activation" }}
+    {{"If you forgot your password, click the button below to recover it." if errortype == "password"}}
+    {{"Remember to use your email address as your username to log in." if errortype == "username"}}</p>
+</div></div> {% endif %}
+
+{%if confirm %} <div class="textcontain row confirm"><div class="confirm col s12">
+    <p>New User Created.</p>
+</div></div> {% endif %}
+
+    <form  name="userdatacreateform" id="userdatacreateformform" action="{{ url_for('admincreateuser') }}" method="post">
+        {{ userdatacreateform.hidden_tag() }}
+        <div class="textcontain row">
+            <div class="input-field col s6">
+              {{userdatacreateform.username.label}}{{ userdatacreateform.username }}
+            </div>
+            <div class="input-field col s6">
+              {{userdatacreateform.usertype.label}}{{ userdatacreateform.usertype }}
+            </div>
+        </div>
+
+        <div class="textcontain row">
+            <div class="input-field col s6">
+              {{userdatacreateform.newpassword.label}}{{ userdatacreateform.newpassword}}
+            </div>
+            <div class="input-field col s6">
+              {{userdatacreateform.repeatpassword.label}}{{ userdatacreateform.repeatpassword}}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s12" style="cursor: pointer;" id="logindiv">
+              {{ userdatacreateform.submit(id="loginbutton", class="btn-large waves-effect waves-light bgMAROON longbutton") }}
+            </div>
+        </div>
+    </form>
+
+
+</div>
+{% endblock %}

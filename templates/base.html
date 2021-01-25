@@ -25,6 +25,15 @@
     .longbutton {width:100%;}
     .textcontain, .btn-row{background-color:white; border-radius:5px; padding:5px; margin-top:10px;}
     .error {background-color:red;}
+    .confirm {background-color:green;}
+
+    // Materialize isn't perfect //
+    // Checkboxes are strange, the checkbox is wrapped in a label tag with the label in a span following. //
+    [type="radio"]:not(:checked)+span, [type="radio"]:checked+span {font-size: 1.25rem;}
+    input[type="file"] {display: none;}
+    input[type=file]:hover, input[type=file]{background-color:rgba(0,0,0,0.1); color:rgb(97,97,97)}
+
+
     </style>
 
     <script type="text/javascript" src="/static/js/jquery.js"></script>

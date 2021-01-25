@@ -35,8 +35,10 @@ def logthis(data):
     data = str(datetime.now())+":"+str(data)
     data = "".join(data.split("'"))
     data = "".join(data.split('"'))
-    db.session.add(logs(data))
+    thislog = logs(data)
+    db.session.add(thislog)
     db.session.commit()
+    return True
 
 # Data Models
 class users(db.Model):
@@ -242,28 +244,40 @@ def logout():
 def switchboard():
     return render_template("switchboard.html")
 
+@defaultapp.route('/admingetusers.html')
+@login_required
+def admingetusers():
+    if current_user.is_admin():
+        qusers = users.query.all()
+        return render_template("admingetusers.html", users=qusers)
+    else:
+        return redirect(url_for("switchboard"))
+
 @defaultapp.route('/admincreateuser.html', methods=["GET", "POST"])
 @login_required
 def admincreateuser():
     if current_user.is_admin():
         confirm = False
         error = False
-        userdatacreateform = UserDataCreateForm
-        if userdatacreateform.validate_on_submit():
-            #request is post and form is filled and valid
-            confirm = True
-            username = userdatacreateform.username.data.strip().lower()
-            usertype = int(userdatacreateform.usertype.data)
-            userpassword = hashme(userdatacreateform.newpassword.data)
-            newuser = users(username=username, usertype=usertype, passwordhash=userpassword)
-            db.session.add(newuser)
-            db.session.commit()
-            logthis("WARN: {} Created New User: {} {}".format(current_user.username, username, usertype))
-        else:
-            if not userdatacreateform.validate_on_submit():
-                #form is invalid
-                error = True
+        userdatacreateform = UserDataCreateForm()
+        if request.method == "POST":
+            debug = userdatacreateform.validate()
+            if userdatacreateform.validate_on_submit():
+                #request is post and form is filled and valid
                 confirm = True
+                username = userdatacreateform.username.data.strip().lower()
+                usertype = int(userdatacreateform.usertype.data)
+                userpassword = hashme(userdatacreateform.newpassword.data)
+                newuser = users(username=username, usertype=usertype, passwordhash=userpassword)
+                db.session.add(newuser)
+                db.session.commit()
+                logthis("WARN: {} Created New User: {} {}".format(current_user.username, username, usertype))
+            else:
+                if not userdatacreateform.validate_on_submit():
+                    #form is invalid
+                    error = True
+        else:
+            print("DEBUG")
         return render_template("admincreateuser.html", userdatacreateform=userdatacreateform, error=error, confirm=confirm)
     else:
         return redirect(url_for("switchboard"))
@@ -274,7 +288,7 @@ def adminupdateuser():
     if current_user.is_admin() and request.values.get("uuid"):
         confirm = False
         error = False
-        userdataupdateform = UserDataUpdateForm
+        userdataupdateform = UserDataUpdateForm()
         thisuser = users.query.filter(users.uuid == request.values.get("uuid")).one_or_none()
         if request.method == "GET":
             userdataupdateform.username.data = thisuser.username

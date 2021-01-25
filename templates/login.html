@@ -22,12 +22,13 @@ $(document).ready(function(){
 </nav>
 
 <div class="container">
+<br />
 
 {%if error %} <div class="textcontain row error"><div class="error col s12">
-    Incorrect Password, Username, or your account is not active. <br>
+    <p>Incorrect Password, Username, or your account is not active. <br>
     {{'If you recently signed up, <br> you need to activate your account.' if errortype == "activation" }}
     {{"If you forgot your password, click the button below to recover it." if errortype == "password"}}
-    {{"Remember to use your email address as your username to log in." if errortype == "username"}}
+    {{"Remember to use your email address as your username to log in." if errortype == "username"}}</p>
 </div></div> {% endif %}
 
 

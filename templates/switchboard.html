@@ -26,6 +26,9 @@ $(document).ready(function(){
 
 <div class="container">
 <br />
+    {% if current_user.is_admin() %}
+        <a href="/admingetusers.html" class="btn-large waves-effect waves-light bgMAROON longbutton">Edit Users</a> <br />
+    {% endif %}
     <a href="/first.html" class="btn-large waves-effect waves-light bgMAROON longbutton">first</a>
 
 </div>

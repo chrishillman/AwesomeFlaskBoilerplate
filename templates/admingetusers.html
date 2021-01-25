@@ -1,0 +1,35 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<script>
+$(document).ready(function(){
+
+  });
+</script>
+
+<nav>
+    <div class="nav-wrapper row bgMAROON" id="nav">
+      <div class="col s10 nav">
+        <a href="/switchboard.html" class="breadcrumb">
+            <i class="material-icons left">home</i>Main</a>
+        <a href="#!" class="breadcrumb">
+            Edit Users
+        </a>
+      </div>
+        <div class="col s2 nav">
+            <a href="/logout.html" class="btn-large waves-effect waves-light bgCRIMSON">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+<br />
+    <a href="/admincreateuser.html" class="btn-large waves-effect waves-light bgMAROON longbutton">Create User</a>
+
+    {% for user in users %}
+        {{ user.id }} {{ user.uuid }} {{ user.username }} <a href="/adminupdateuser.html?uuid={{user.uuid}}" class="btn-small waves-effect waves-light bgMAROON">Edit</a><br>
+    {% endfor %}
+</div>
+{% endblock %}
