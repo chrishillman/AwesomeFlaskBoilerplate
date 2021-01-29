@@ -1,0 +1,33 @@
+# Notes:
+"""
+Select inputs need labels AFTER the select
+
+"active" class for pre-filled text fields
+Every table needs to be sorted:
+(jquery)
+
+  $("table").tablesorter({headers:{'.nosort':{sorter:false}}});
+
+Every form with a submit needs:
+(jquery)
+// Every From needs this:
+    $('select').formSelect();
+     document.getElementById("logindiv").addEventListener("click", function () {
+            document.getElementById("submitbutton").click()
+        });
+
+and the submitbutton needs to look like:
+
+<div class="row">
+            <div class="col s12" style="cursor: pointer;" id="logindiv">
+              {{ ______FORMNAME______.submit(id="submitbutton", class="btn-large waves-effect waves-light bgMAROON longbutton") }}
+            </div>
+        </div>
+
+"""
+
+
+# to dos:
+"""
+TODO: stip TODOs from CSS and JS files.
+"""

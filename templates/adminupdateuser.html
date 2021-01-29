@@ -6,7 +6,12 @@
 <script>
 $(document).ready(function(){
 
+    // Every From needs this:
     $('select').formSelect();
+     document.getElementById("logindiv").addEventListener("click", function () {
+            document.getElementById("submitbutton").click()
+        });
+
 
   });
 </script>
@@ -16,6 +21,9 @@ $(document).ready(function(){
       <div class="col s10 nav">
         <a href="/switchboard.html" class="breadcrumb">
             <i class="material-icons left">home</i>Main</a>
+          <a href="/admingetusers.html" class="breadcrumb">
+            List Users
+        </a>
         <a href="#!" class="breadcrumb">
             Update User
         </a>
@@ -31,24 +39,36 @@ $(document).ready(function(){
    
     
 {%if error %} <div class="textcontain row error"><div class="error col s12">
-    <p>Incorrect Password, Username, or your account is not active. <br>
-    {{'If you recently signed up, <br> you need to activate your account.' if errortype == "activation" }}
-    {{"If you forgot your password, click the button below to recover it." if errortype == "password"}}
-    {{"Remember to use your email address as your username to log in." if errortype == "username"}}</p>
+    <p>Errors prevent updating this user.</p>
 </div></div> {% endif %}
 
 {%if confirm %} <div class="textcontain row confirm"><div class="confirm col s12">
-    <p>New User updated.</p>
+    <p>User Updated.</p>
 </div></div> {% endif %}
 
     <form  name="userdataupdateform" id="userdataupdateformform" action="{{ url_for('adminupdateuser') }}" method="post">
         {{ userdataupdateform.hidden_tag() }}
+
         <div class="textcontain row">
             <div class="input-field col s6">
               {{userdataupdateform.username.label}}{{ userdataupdateform.username(class="active") }}
+                {%if userdataupdateform.username.errors%}
+                <ul class="error">
+                    {%for error in userdataupdateform.username.errors%}
+                    <li><i class="small material-icons">error</i>{{error}}</li>
+                    {%endfor%}
+                </ul>
+                {%endif%}
             </div>
             <div class="input-field col s4">
-              {{userdataupdateform.usertype.label}}{{ userdataupdateform.usertype }}
+              {{ userdataupdateform.usertype(class="active") }}{{userdataupdateform.usertype.label}}
+                {%if userdataupdateform.usertype.errors%}
+                <ul class="error">
+                    {%for error in userdataupdateform.usertype.errors%}
+                    <li><i class="small material-icons">error</i>{{error}}</li>
+                    {%endfor%}
+                </ul>
+                {%endif%}
             </div>
             <div class="input-field col s2">
                 <label>{{ userdataupdateform.active }}<span>{{userdataupdateform.active.label}}</span></label>
@@ -58,15 +78,29 @@ $(document).ready(function(){
         <div class="textcontain row">
             <div class="input-field col s6">
               {{userdataupdateform.newpassword.label}}{{ userdataupdateform.newpassword}}
+                {%if userdataupdateform.newpassword.errors%}
+                <ul class="error">
+                    {%for error in userdataupdateform.newpassword.errors%}
+                    <li><i class="small material-icons">error</i>{{error}}</li>
+                    {%endfor%}
+                </ul>
+                {%endif%}
             </div>
             <div class="input-field col s6">
               {{userdataupdateform.repeatpassword.label}}{{ userdataupdateform.repeatpassword}}
+                {%if userdataupdateform.repeatpassword.errors%}
+                <ul class="error">
+                    {%for error in userdataupdateform.repeatpassword.errors%}
+                    <li><i class="small material-icons">error</i>{{error}}</li>
+                    {%endfor%}
+                </ul>
+                {%endif%}
             </div>
         </div>
 
         <div class="row">
             <div class="col s12" style="cursor: pointer;" id="logindiv">
-              {{ userdataupdateform.submit(id="loginbutton", class="btn-large waves-effect waves-light bgMAROON longbutton") }}
+              {{ userdataupdateform.submit(id="submitbutton", class="btn-large waves-effect waves-light bgMAROON longbutton") }}
             </div>
         </div>
     </form>

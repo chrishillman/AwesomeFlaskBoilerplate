@@ -6,6 +6,8 @@
 <script>
 $(document).ready(function(){
 
+    $("table").tablesorter({headers:{'.nosort':{sorter:false}}});
+
   });
 </script>
 
@@ -26,10 +28,39 @@ $(document).ready(function(){
 
 <div class="container">
 <br />
-    <a href="/admincreateuser.html" class="btn-large waves-effect waves-light bgMAROON longbutton">Create User</a>
+    <div class="row">
+        <div class="col s12">
+            <a href="/admincreateuser.html" class="btn-large waves-effect waves-light bgMAROON longbutton">Create User</a>
+        </div>
+    </div>
 
-    {% for user in users %}
-        {{ user.id }} {{ user.uuid }} {{ user.username }} <a href="/adminupdateuser.html?uuid={{user.uuid}}" class="btn-small waves-effect waves-light bgMAROON">Edit</a><br>
-    {% endfor %}
+    <div class="row">
+        <div class="col s12">
+            <table class="sortable"><thead><tr>
+                <th>id</th>
+                <th class="nosort">uuid</th>
+                <th>username</th>
+                <th>usertype</th>
+                <th>active</th>
+                <th>authenticated</th>
+                <th class="nosort"></th>
+                </tr></thead><tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{user.id}}</td>
+                        <td>{{user.uuid}}</td>
+                        <td>{{user.username}}</td>
+                        <td>{{usertypedict[user.usertype | string]}}</td>
+                        <td>{{"Active" if user.active == 1 else "Inactive"}}</td>
+                        <td>{{"Yes" if user.authenticated == 1 else "No"}}</td>
+                        <td>
+                            <a href="/adminupdateuser.html?uuid={{user.uuid}}" class="btn-small waves-effect waves-light bgMAROON">Edit</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -8,13 +8,16 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, Hidde
 from wtforms.validators import DataRequired, Email, EqualTo, Length, InputRequired, NoneOf, ValidationError, Optional
 import hashlib
 import uuid
+from functools import wraps
+
 
 defaultapp = Flask(__name__)
-defaultapp.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+defaultapp.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db?check_same_thread=False'
 #TODO: Change this key!
 defaultapp.config['SECRET_KEY'] = 'ansdv898hw9vrhq34nkjntgir9abeee8r7voeinv5i4ungdsjfbgvdsbduyb87hrn5bvurh354iu5bn7ve'
 defaultapp.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 defaultapp.config['TESTING'] = False
+defaultapp.jinja_env.add_extension(extension='jinja2.ext.do')
 
 #TODO: Change this key!
 bigkey = "892y301t98h913409gh934h9014hf134h987538y9gh352984bh2953924895"
@@ -40,7 +43,7 @@ def logthis(data):
     db.session.commit()
     return True
 
-# Data Models
+# Data Models (can't seem to get this to work as separate python files)
 class users(db.Model):
     __tablename__ = "users"
     active = db.Column(db.Boolean, nullable=False)
@@ -55,6 +58,7 @@ class users(db.Model):
     def create(self):
         db.session.add(self)
         db.session.commit()
+        logthis("WARN: Commit from User Create: {} {}".format(self.username, self.usertype))
         return self
 
     def __init__(self, username, passwordhash, usertype):
@@ -113,50 +117,74 @@ if not user:
     administrator = users(username="administrator", passwordhash=hashme("ThisIsThePassword123456!@#$%^"), usertype=99)
     db.session.add(administrator)
     db.session.commit()
+    db.session.refresh(administrator)
     logthis("WARN: Administrator Account Created.")
+
 
 # WTForms
 class UserDataCreateForm(FlaskForm):
     username = StringField("User Name*", validators=[InputRequired()])
+    def validate_uniqueuser(self, field):
+        allusers = db.session.query(users.username).all()
+        for inputuser in allusers:
+            if field.data.lower() == inputuser.username.lower():
+                raise ValidationError('This username already registered')
+
     usertype = SelectField("User Type*", choices=[(1, "Basic User"), (99, "Administrator")])
     newpassword = PasswordField("Password",
                                 validators=[Length(min=10, message="Passwords must be more than 10 characters"),
                                             InputRequired()])
+
     def validate_newpassword(self, field):
-        #Firefox password manager only provides upper, lower, and number passwords
+        # Firefox password manager only provides upper, lower, and number passwords
         alphaUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         alphaLower = alphaUpper.lower()
         nums = "1234567890"
         if not ((1 in [c in alphaUpper for c in field.data]) and (1 in [c in alphaLower for c in field.data]) and
                 (1 in [c in nums for c in field.data])):
             raise ValidationError('Password must contain at least 1 upper, 1 lower, and 1 number.')
-    repeatpassword = PasswordField("Confirm Password", validators=[InputRequired(), EqualTo('newpassword', message='Passwords must match')])
+
+    repeatpassword = PasswordField("Confirm Password",
+                                   validators=[InputRequired(), EqualTo('newpassword', message='Passwords must match')])
     submit = SubmitField("Create User")
 
+
 class UserDataUpdateForm(FlaskForm):
-    username = StringField("User Name*", validators=[InputRequired()])
+    username = StringField("User Name*", validators=[Optional()])
+
+    def validate_uniqueuser(self, field):
+        allusers = db.session.query(users.username).all()
+        for inputuser in allusers:
+            if field.data.lower() == inputuser.username.lower():
+                raise ValidationError('This username already registered')
+
     usertype = SelectField("User Type*", choices=[(1, "Basic User"), (99, "Administrator")])
-    active = BooleanField("Active?", validators=[DataRequired()])
+    active = BooleanField("Active?", validators=[Optional()])
     id = HiddenField(validators=[Optional()])
     uuid = HiddenField(validators=[Optional()])
     newpassword = PasswordField("Password",
                                 validators=[Length(min=10, message="Passwords must be more than 10 characters"),
                                             Optional()])
+
     def validate_newpassword(self, field):
-        #Firefox password manager only provides upper, lower, and number passwords
+        # Firefox password manager only provides upper, lower, and number passwords
         alphaUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         alphaLower = alphaUpper.lower()
         nums = "1234567890"
         if not ((1 in [c in alphaUpper for c in field.data]) and (1 in [c in alphaLower for c in field.data]) and
                 (1 in [c in nums for c in field.data])):
             raise ValidationError('Password must contain at least 1 upper, 1 lower, and 1 number.')
-    repeatpassword = PasswordField("Confirm Password", validators=[Optional(), EqualTo('newpassword', message='Passwords must match')])
+
+    repeatpassword = PasswordField("Confirm Password",
+                                   validators=[Optional(), EqualTo('newpassword', message='Passwords must match')])
     submit = SubmitField("Update User")
+
 
 class UserPasswordResetForm(FlaskForm):
     newpassword = PasswordField("New Password",
                                 validators=[Length(min=10, message="Passwords must be more than 10 characters"),
                                             InputRequired()])
+
     def validate_newpassword(self, field):
         alphaUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         alphaLower = alphaUpper.lower()
@@ -164,8 +192,11 @@ class UserPasswordResetForm(FlaskForm):
         if not ((1 in [c in alphaUpper for c in field.data]) and (1 in [c in alphaLower for c in field.data]) and
                 (1 in [c in nums for c in field.data])):
             raise ValidationError('Password must contain at least 1 upper, 1 lower, and 1 number.')
-    repeatpassword = PasswordField("Confirm Password", validators=[InputRequired(), EqualTo('newpassword', message='Passwords must match')])
+
+    repeatpassword = PasswordField("Confirm Password",
+                                   validators=[InputRequired(), EqualTo('newpassword', message='Passwords must match')])
     submit = SubmitField("Update Password")
+
 
 class UserLoginForm(FlaskForm):
     username = StringField("User Name*", validators=[InputRequired()])
@@ -173,6 +204,14 @@ class UserLoginForm(FlaskForm):
     submit = SubmitField("Log In")
 
 # Flask
+
+def superuser(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_admin():
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @defaultapp.before_request
 def before_request():
@@ -212,6 +251,7 @@ def login():
                     thisuser.authenticated = True
                     db.session.add(thisuser)
                     db.session.commit()
+                    db.session.refresh(thisuser)
                     login_user(thisuser, remember=True, duration=timedelta(minutes=45))
                     logthis("User Logged In: {}".format(userlogin.username.data))
                     return redirect(url_for("switchboard"))
@@ -235,6 +275,7 @@ def logout():
     thisuser.authenticated = False
     db.session.add(thisuser)
     db.session.commit()
+    db.session.refresh(thisuser)
     logthis("User {} Logged out.".format(thisuser.username))
     logout_user()
     return redirect(url_for("index"))
@@ -246,6 +287,7 @@ def switchboard():
 
 @defaultapp.route('/admingetusers.html')
 @login_required
+@superuser
 def admingetusers():
     if current_user.is_admin():
         qusers = users.query.all()
@@ -255,6 +297,7 @@ def admingetusers():
 
 @defaultapp.route('/admincreateuser.html', methods=["GET", "POST"])
 @login_required
+@superuser
 def admincreateuser():
     if current_user.is_admin():
         confirm = False
@@ -271,21 +314,20 @@ def admincreateuser():
                 newuser = users(username=username, usertype=usertype, passwordhash=userpassword)
                 db.session.add(newuser)
                 db.session.commit()
+                db.session.refresh(newuser)
                 logthis("WARN: {} Created New User: {} {}".format(current_user.username, username, usertype))
             else:
                 if not userdatacreateform.validate_on_submit():
-                    #form is invalid
                     error = True
-        else:
-            print("DEBUG")
         return render_template("admincreateuser.html", userdatacreateform=userdatacreateform, error=error, confirm=confirm)
     else:
         return redirect(url_for("switchboard"))
 
 @defaultapp.route('/adminupdateuser.html', methods=["GET", "POST"])
 @login_required
+@superuser
 def adminupdateuser():
-    if current_user.is_admin() and request.values.get("uuid"):
+    if request.values.get("uuid"):
         confirm = False
         error = False
         userdataupdateform = UserDataUpdateForm()
@@ -294,22 +336,22 @@ def adminupdateuser():
             userdataupdateform.username.data = thisuser.username
             userdataupdateform.usertype.data = thisuser.usertype
             userdataupdateform.active.data = thisuser.active
-        else:
+            userdataupdateform.id.data = thisuser.id
+            userdataupdateform.uuid.data = thisuser.uuid
+        elif request.method == "POST":
             if userdataupdateform.validate_on_submit():
-                #request is post and form is filled and valid
                 confirm = True
-                username = userdataupdateform.username.data.strip().lower()
-                usertype = int(userdataupdateform.usertype.data)
-                userpassword = hashme(userdataupdateform.newpassword.data)
-                newuser = users(username=username, usertype=usertype, passwordhash=userpassword)
-                db.session.add(newuser)
+                thisuser.username = userdataupdateform.username.data.strip().lower()
+                thisuser.usertype = int(userdataupdateform.usertype.data)
+                thisuser.userpassword = hashme(userdataupdateform.newpassword.data)
+                thisuser.active = userdataupdateform.active.data
                 db.session.commit()
-                logthis("WARN: {} Updated User: {} {} {}".format(current_user.username, request.values.get("uuid"), username, usertype))
+                db.session.refresh(thisuser)
+                logthis("WARN: {} Updated User: {} {} {}".format(current_user.username, request.values.get("uuid"), thisuser.username, thisuser.usertype))
             else:
                 if not userdataupdateform.validate_on_submit():
-                    #form is invalid
                     error = True
-                    confirm = True
+                    confirm = False
         return render_template("adminupdateuser.html", userdataupdateform=userdataupdateform, error=error, confirm=confirm)
     else:
         return redirect(url_for("switchboard"))

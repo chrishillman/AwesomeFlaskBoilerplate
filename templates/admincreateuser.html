@@ -6,7 +6,12 @@
 <script>
 $(document).ready(function(){
 
+    // Every From needs this:
     $('select').formSelect();
+     document.getElementById("logindiv").addEventListener("click", function () {
+            document.getElementById("submitbutton").click()
+        });
+
 
   });
 </script>
@@ -16,6 +21,9 @@ $(document).ready(function(){
       <div class="col s10 nav">
         <a href="/switchboard.html" class="breadcrumb">
             <i class="material-icons left">home</i>Main</a>
+        <a href="/admingetusers.html" class="breadcrumb">
+            List Users
+        </a>
         <a href="#!" class="breadcrumb">
             Create User
         </a>
@@ -46,24 +54,52 @@ $(document).ready(function(){
         <div class="textcontain row">
             <div class="input-field col s6">
               {{userdatacreateform.username.label}}{{ userdatacreateform.username }}
+                {%if userdatacreateform.username.errors%}
+                <ul class="error">
+                    {%for error in userdatacreateform.username.errors%}
+                    <li><i class="small material-icons">error</i>{{error}}</li>
+                    {%endfor%}
+                </ul>
+                {%endif%}
             </div>
             <div class="input-field col s6">
-              {{userdatacreateform.usertype.label}}{{ userdatacreateform.usertype }}
+              {{ userdatacreateform.usertype }}{{userdatacreateform.usertype.label}}
+                {%if userdatacreateform.usertype.errors%}
+                <ul class="error">
+                    {%for error in userdatacreateform.usertype.errors%}
+                    <li><i class="small material-icons">error</i>{{error}}</li>
+                    {%endfor%}
+                </ul>
+                {%endif%}
             </div>
         </div>
 
         <div class="textcontain row">
             <div class="input-field col s6">
               {{userdatacreateform.newpassword.label}}{{ userdatacreateform.newpassword}}
+                {%if userdatacreateform.newpassword.errors%}
+                <ul class="error">
+                    {%for error in userdatacreateform.newpassword.errors%}
+                    <li><i class="small material-icons">error</i>{{error}}</li>
+                    {%endfor%}
+                </ul>
+                {%endif%}
             </div>
             <div class="input-field col s6">
               {{userdatacreateform.repeatpassword.label}}{{ userdatacreateform.repeatpassword}}
+                {%if userdatacreateform.repeatpassword.errors%}
+                <ul class="error">
+                    {%for error in userdatacreateform.repeatpassword.errors%}
+                    <li><i class="small material-icons">error</i>{{error}}</li>
+                    {%endfor%}
+                </ul>
+                {%endif%}
             </div>
         </div>
 
         <div class="row">
             <div class="col s12" style="cursor: pointer;" id="logindiv">
-              {{ userdatacreateform.submit(id="loginbutton", class="btn-large waves-effect waves-light bgMAROON longbutton") }}
+              {{ userdatacreateform.submit(id="submitbutton", class="btn-large waves-effect waves-light bgMAROON longbutton") }}
             </div>
         </div>
     </form>
