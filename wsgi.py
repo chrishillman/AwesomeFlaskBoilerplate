@@ -1,7 +1,7 @@
 # apt install python3-pip python3-dev nginx python3-pip
 # pip3 install venv gunicorn flask
 
-from app import jitterapp as application
+from app import defaultapp as application
 # WSGI looks for 'application':  https://stackoverflow.com/questions/33379287/gunicorn-cant-find-app-when-name-changed-from-application
 
 if "__name__" == "__main__":
