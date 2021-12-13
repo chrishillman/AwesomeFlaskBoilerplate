@@ -4,11 +4,13 @@ from datetime import datetime, timedelta, date
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, HiddenField, FileField, SelectField, \
-    TextAreaField, DateField, DateTimeField, SelectMultipleField
+    TextAreaField, DateField, DateTimeField, SelectMultipleField, MultipleFileField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, InputRequired, NoneOf, ValidationError, Optional
 import hashlib
 import uuid
 from functools import wraps
+
+import elements
 
 
 defaultapp = Flask(__name__)
@@ -206,12 +208,16 @@ def load_user_from_request(request):
 @defaultapp.route('/', methods=["GET"])
 @defaultapp.route('/index.html', methods=["GET"])
 def index():
+    links = [{'url': '/index.html', 'display': '<i class="material-icons left">home</i>Main</a>'}]
+    navbar = elements.NavBar(links=links)
     if current_user.authenticated:
         return redirect(url_for("switchboard"))
-    return render_template('index.html')
+    return render_template('index.html', navbar=navbar)
 
 @defaultapp.route('/login.html', methods=["GET", "POST"])
 def login():
+    links = [{'url': '/index.html', 'display': '<i class="material-icons left">home</i>Main</a>'}]
+    navbar = elements.NavBar(links=links)
     userlogin = UserLoginForm()
     error = False
     errortype = ""
@@ -239,7 +245,7 @@ def login():
             logthis(f"User Login Failed: {userlogin.username.data}")
             error = True
             errortype = "username"
-    return render_template("login.html", userlogin=userlogin, error=error, errortype=errortype)
+    return render_template("login.html", userlogin=userlogin, error=error, errortype=errortype, navbar=navbar)
 
 @defaultapp.route('/logout.html', methods=["GET"])
 @login_required
@@ -255,22 +261,28 @@ def logout():
 @defaultapp.route('/switchboard.html', methods=["GET", "POST"])
 @login_required
 def switchboard():
-    return render_template("switchboard.html")
+    links = [{'url': '/switchboard.html', 'display': '<i class="material-icons left">home</i>Main</a>'}]
+    navbar = elements.NavBar(links=links)
+    return render_template("switchboard.html", navbar=navbar)
 
 @defaultapp.route('/admingetusers.html')
 @login_required
 @superuser
 def admingetusers():
-    if current_user.is_admin():
-        qusers = users.query.all()
-        return render_template("admingetusers.html", users=qusers)
-    else:
-        return redirect(url_for("switchboard"))
+    links = [{'url': '/switchboard.html', 'display': '<i class="material-icons left">home</i>Main</a>'},
+             {'url': '#!', 'display': 'List User'}]
+    navbar = elements.NavBar(links=links)
+    qusers = users.query.all()
+    return render_template("admingetusers.html", users=qusers, navbar=navbar)
 
 @defaultapp.route('/adminupdateuser.html', methods=["GET", "POST"])
 @login_required
 @superuser
 def adminupdateuser():
+    links = [{'url': '/switchboard.html', 'display': '<i class="material-icons left">home</i>Main</a>'},
+             {'url':'/admingetusers.html', 'display':' List Users'},
+             {'url':'#!', 'display':'Update User'}]
+    navbar = elements.NavBar(links=links)
     confirm = False
     userdataupdateform = UserDataUpdateForm()
     if request.values.get("uuid"):
@@ -304,7 +316,7 @@ def adminupdateuser():
             db.session.add(newuser)
             db.session.commit()
             logthis(f"WARN: {current_user.username} Created User: {username} {usertype}")
-    return render_template("adminupdateuser.html", userdataupdateform=userdataupdateform, confirm=confirm)
+    return render_template("adminupdateuser.html", userdataupdateform=userdataupdateform, confirm=confirm, navbar=navbar)
 
 # Flask App
 
