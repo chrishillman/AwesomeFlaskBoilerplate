@@ -15,13 +15,10 @@ import elements
 
 defaultapp = Flask(__name__)
 defaultapp.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db?check_same_thread=False'
-#TODO: Change this key!
 defaultapp.config['SECRET_KEY'] = '84g3hin3v88b3nuceif83b94uf59b4n9u5nf487fni5u3ng379bf9374b'
 defaultapp.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 defaultapp.config['TESTING'] = False
 defaultapp.jinja_env.add_extension(extension='jinja2.ext.do')
-
-#TODO: Change this key!
 bigkey = "76438953g48th9384g8397h45f3683b5798fn34fy834eyhfg8487y6ujhgt"
 
 db = SQLAlchemy(defaultapp)
@@ -56,6 +53,7 @@ class users(db.Model):
     userpasswordhash = db.Column(db.String(64), nullable=False)
     usertype = db.Column(db.Integer, nullable=False)
     # normally 1=user ... 99=admin
+    notes = db.Column(db.Text, nullable=True)
 
     def create(self):
         db.session.add(self)
@@ -63,13 +61,14 @@ class users(db.Model):
         logthis(f"WARN: Commit from User Create: {self.username} {self.usertype}")
         return self
 
-    def __init__(self, username, userpasswordhash, usertype, active):
+    def __init__(self, username, userpasswordhash, usertype, active, notes):
         self.uuid = getuuidhash()
         self.username = username
         self.userpasswordhash = userpasswordhash
         self.usertype = int(usertype)
         self.active = active
         self.authenticated = False
+        self.notes = notes
 
     def is_admin(self):
         if self.usertype > 10:
@@ -116,7 +115,7 @@ db.create_all()
 
 user = users.query.filter(users.username.like("administrator")).one_or_none()
 if not user:
-    administrator = users(username="administrator", userpasswordhash=hashme("ThisIsThePassword123456!@#$%^"), usertype=99, active=True)
+    administrator = users(username="administrator", userpasswordhash=hashme("ThisIsThePassword123456!@#$%^"), usertype=99, active=True, notes=None)
     db.session.add(administrator)
     db.session.commit()
     logthis("WARN: Administrator Account Created.")
@@ -149,8 +148,8 @@ class UserDataUpdateForm(FlaskForm):
 
     repeatpassword = PasswordField("Confirm Password",
                                    validators=[Optional(), EqualTo('newpassword', message='Passwords must match')])
+    notes = TextAreaField("User Notes")
     submit = SubmitField("Update User")
-
 
 class UserPasswordResetForm(FlaskForm):
     newpassword = PasswordField("New Password",
@@ -168,7 +167,6 @@ class UserPasswordResetForm(FlaskForm):
     repeatpassword = PasswordField("Confirm Password",
                                    validators=[InputRequired(), EqualTo('newpassword', message='Passwords must match')])
     submit = SubmitField("Update Password")
-
 
 class UserLoginForm(FlaskForm):
     username = StringField("User Name*", validators=[InputRequired()])
@@ -210,7 +208,7 @@ def load_user_from_request(request):
 def index():
     links = [{'url': '/index.html', 'display': '<i class="material-icons left">home</i>Main</a>'}]
     navbar = elements.NavBar(links=links)
-    if current_user.authenticated:
+    if current_user.is_authenticated:
         return redirect(url_for("switchboard"))
     return render_template('index.html', navbar=navbar)
 
@@ -221,7 +219,7 @@ def login():
     userlogin = UserLoginForm()
     error = False
     errortype = ""
-    if current_user.authenticated:
+    if current_user.is_authenticated:
         return redirect(url_for("switchboard"))
     if userlogin.validate_on_submit():
         thisuser = users.query.filter(users.username.like(userlogin.username.data.strip())).one_or_none()
@@ -279,40 +277,46 @@ def admingetusers():
 @login_required
 @superuser
 def adminupdateuser():
-    links = [{'url': '/switchboard.html', 'display': '<i class="material-icons left">home</i>Main</a>'},
+    navlinks = [{'url': '/switchboard.html', 'display': '<i class="material-icons left">home</i>Main</a>'},
              {'url':'/admingetusers.html', 'display':' List Users'},
              {'url':'#!', 'display':'Update User'}]
-    navbar = elements.NavBar(links=links)
+    navbar = elements.NavBar(links=navlinks)
     confirm = False
+    confirmlinks = [
+        {'url': '/admingetusers.html', 'display': 'Edit Other Users', 'color': 'fgSNOW bgORANGE'},
+        {'url': '/adminupdateuser.html', 'display': 'Create New User', 'color': 'fgSNOW bgBLUE'},
+        {'url': '/switchboard.html', 'display': 'Return', 'color': 'fgSNOW bgGOLD'}
+    ]
     userdataupdateform = UserDataUpdateForm()
     if request.values.get("uuid"):
         thisuser = users.query.filter(users.uuid == request.values.get("uuid")).one_or_none()
         if request.method == "GET":
             userdataupdateform.username.data = thisuser.username
             userdataupdateform.usertype.data = thisuser.usertype
-            for field in userdataupdateform.usertype:
-                if field.data == thisuser.usertype:
-                    field.checked = True
             userdataupdateform.active.data = thisuser.active
             userdataupdateform.id.data = thisuser.id
             userdataupdateform.uuid.data = thisuser.uuid
+            userdataupdateform.notes.data = thisuser.notes
         elif request.method == "POST":
             if userdataupdateform.validate_on_submit():
-                confirm = True
+                confirm = elements.ConfirmBar(links=confirmlinks, message="User Updated")
                 thisuser.username = userdataupdateform.username.data.strip().lower()
                 thisuser.usertype = int(userdataupdateform.usertype.data)
-                thisuser.userpasswordhash = hashme(userdataupdateform.newpassword.data)
+                if userdataupdateform.newpassword.data:
+                    thisuser.userpasswordhash = hashme(userdataupdateform.newpassword.data)
                 thisuser.active = userdataupdateform.active.data
+                thisuser.notes = userdataupdateform.notes.data
                 db.session.commit()
                 logthis(f"WARN: {current_user.username} Updated User: {request.values.get('uuid')} {thisuser.username} {thisuser.usertype}")
     else:
         if request.method == "POST" and userdataupdateform.validate_on_submit():
-            confirm = True
+            confirm = elements.ConfirmBar(links=confirmlinks, message="User Updated")
             username = userdataupdateform.username.data
             usertype = userdataupdateform.usertype.data
             userpasswordhash = hashme(userdataupdateform.newpassword.data)
+            usernotes = userdataupdateform.notes.data
             active = userdataupdateform.active.data
-            newuser = users(username=username, usertype=usertype, userpasswordhash=userpasswordhash, active=active)
+            newuser = users(username=username, usertype=usertype, userpasswordhash=userpasswordhash, active=active, notes=usernotes)
             db.session.add(newuser)
             db.session.commit()
             logthis(f"WARN: {current_user.username} Created User: {username} {usertype}")

@@ -12,8 +12,64 @@ $(document).ready(function(){
             document.getElementById("submitbutton").click()
         });
 
+     $('textarea').html('').tinymce({
+        setup: function(ed){ ed.on("change", function(){
+                 textchange = true;
+                        document.getElementById('submitbutton').disabled = false;
+         })
+         },
+        init_instance_callback:"setcontents",
+            menubar: true,
+        plugins: [
+        'advlist autolink lists link image charmap print preview anchor',
+        'searchreplace visualblocks code fullscreen',
+        'insertdatetime media table paste code help wordcount'
+        ], image_upload_url: '/upload.html',
+         browser_spellcheck: true,
+        font_formats:"Andale Mono=andale mono,times; " +
+            "Arial=arial,helvetica,sans-serif; " +
+            "Arial Black=arial black,avant garde; " +
+            "Book Antiqua=book antiqua,palatino; " +
+            "Courier New=courier new,courier; " +
+            "Georgia=georgia,palatino; " +
+            "Helvetica=helvetica; " +
+            "Karla=karla;" +
+            "Licorice=licorice; Lobster=lobster; " +
+            "Merriweather=merriweather; Monoton=monoton;" +
+            "Permanent Marker=permanent marker;" +
+            "Terminal=terminal,monaco; " +
+            "Times New Roman=times new roman,times;" +
+            "Ubuntu=ubuntu; Ubuntu Mono=ubuntu mono;",
+        toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+        images_upload_url:'/tinymceupload.html',
+        automatic_uploads:true,
+        images_reuse_filename: false,
+        images_upload_base_path:'/static/uploads',
+         content_style:"@import url('https://fonts.googleapis.com/css2?family=Licorice&display=swap'); " +
+             "@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');" +
+             "@import url('https://fonts.googleapis.com/css2?family=Monoton');" +
+             "@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker');" +
+             "@import url('https://fonts.googleapis.com/css2?family=Karla');" +
+             "@import url('https://fonts.googleapis.com/css2?family=Roboto');" +
+             "@import url('https://fonts.googleapis.com/css2?family=Merriweather');" +
+             "@import url('https://fonts.googleapis.com/css2?family=Ubuntu');" +
+             "@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono');"
+    });
+    //TODO: On the server, parse the fonts used and insert a link like:
+    // <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+    // This can be in a body or head of the html.
 
   });
+
+{% if userdataupdateform.notes.data %}
+        function setcontents(inst){
+            inst.setContent(`{{ userdataupdateform.notes.data | safe }}`);
+            document.getElementById('submitbutton').disabled = false;
+        }
+        {% else %}
+        function setcontents(inst){ inst.setContent(''); }
+    {% endif %}
+
 </script>
 
 {{ navbar | safe }}
@@ -26,9 +82,9 @@ $(document).ready(function(){
     <p>Errors prevent updating this user.</p>
 </div></div> {% endif %}
 
-{%if confirm %} <div class="textcontain row confirm"><div class="confirm col s12">
-    <p>User Updated.</p>
-</div></div> {% endif %}
+{%if confirm %}
+{{ confirm | safe }}
+{% endif %}
 
     <form  name="userdataupdateform" id="userdataupdateformform" action="{{ url_for('adminupdateuser') }}" method="post">
         {{ userdataupdateform.hidden_tag() }}
@@ -82,9 +138,15 @@ $(document).ready(function(){
             </div>
         </div>
 
+        <div class="textcontain row">
+            <div class="input-field col s12">
+                {{ userdataupdateform.notes.label }}{{ userdataupdateform.notes }}
+            </div>
+        </div>
+
         <div class="row">
             <div class="col s12" style="cursor: pointer;" id="logindiv">
-              {{ userdataupdateform.submit(id="submitbutton", class="btn-large bgMAROON fgSNOW") }}
+              {{ userdataupdateform.submit(id="submitbutton", class="btn-large longbutton bgMAROON fgSNOW") }}
             </div>
         </div>
     </form>
